@@ -1,0 +1,144 @@
+local _G = ShaguTweaks.GetGlobalEnv()
+local T = ShaguTweaks.T
+
+local module = ShaguTweaks:register({
+  title = T["Minimap Clean"],
+  description = T["Hides minimap addon buttons automatically when the cursor leaves the minimap area."],
+  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  category = T["World & MiniMap"],
+  enabled = true,
+})
+
+-- 🛡️ Liste noire : tout ce qu'on ne veut PAS toucher (trackers, blips, boutons systeme...)
+local ignoreList = {
+    "MiniMapTrackingFrame",
+    "MiniMapMeetingStoneFrame",
+    "MiniMapMailFrame",
+    "MiniMapPing",
+    "MinimapBackdrop",
+    "MinimapZoomIn",
+    "MinimapZoomOut",
+    "BookOfTracksFrame",
+    "GatherNote",
+    "FishingExtravaganzaMini",
+    "MiniNotePOI",
+    "RecipeRadarMinimapIcon",
+    "FWGMinimapPOI",
+    "MBB_MinimapButtonFrame",
+    "MinimapButtonFrame",  -- MBB peut nommer sa frame sans le prefixe MBB_ selon les versions
+    "QuestieNote",
+    "MetaMap",
+    "LootLinkMinimapButton",
+    "TimeManagerClockButton",
+    "pfMiniMapPin",
+    "Clock",
+    "Timer",
+    "GameTimeFrame",
+    "MinimapToggleButton",
+    "TWMinimapShopFrame",
+    "LFT_Minimap"
+}
+
+local function ShouldIgnore(name)
+    if not name then return true end
+    for _, needle in ipairs(ignoreList) do
+        if string.find(name, needle, 1, true) then
+            return true
+        end
+    end
+    return false
+end
+
+local function IsAddonButton(child)
+    local name = child:GetName()
+
+    if ShouldIgnore(name) then return false end
+
+    local hasClick = child:HasScript("OnClick") and child:GetScript("OnClick")
+    local hasMouseUp = child:HasScript("OnMouseUp") and child:GetScript("OnMouseUp")
+    local hasMouseDown = child:HasScript("OnMouseDown") and child:GetScript("OnMouseDown")
+
+    -- Parfois, le bouton cliquable est cache dans un enfant de la frame principale
+    if not (hasClick or hasMouseUp or hasMouseDown) then
+        for _, subchild in ipairs({child:GetChildren()}) do
+            if subchild:HasScript("OnClick") and subchild:GetScript("OnClick") then
+                return true
+            end
+        end
+    end
+
+    return hasClick or hasMouseUp or hasMouseDown
+end
+
+local function SetButtonsAlpha(alpha)
+    local children = {Minimap:GetChildren()}
+    for _, child in ipairs(children) do
+        -- pcall ici : si un autre addon (MBB, etc.) est en train de detruire/
+        -- reparenter sa frame au meme moment, un appel direct sur un objet
+        -- dans un etat incoherent peut planter le client. On isole l'appel
+        -- pour qu'une frame problematique ne fasse pas tomber tout le module.
+        local ok, isButton = pcall(IsAddonButton, child)
+        if ok and isButton then
+            pcall(child.SetAlpha, child, alpha)
+        end
+    end
+end
+
+module.enable = function(self)
+    -- Etat interne stocke sur le module -> propre a chaque enable
+    self.isShown = true
+    self.leaveTime = nil
+    self.elapsed = 0
+
+    local HIDE_DELAY = 3
+    local THROTTLE = 0.1
+    local MARGIN = 30
+
+    self.frame = self.frame or CreateFrame("Frame")
+
+    self.frame:SetScript("OnUpdate", function()
+        -- ⚠️ En vanilla 1.12, OnUpdate ne passe pas "elapsed" en parametre de fonction,
+        -- il faut utiliser la variable globale arg1 !
+        self.elapsed = self.elapsed + arg1
+        if self.elapsed < THROTTLE then return end
+        self.elapsed = 0
+
+        local x, y = GetCursorPosition()
+        local scale = Minimap:GetEffectiveScale()
+        local mx, my = x / scale, y / scale
+
+        local left = Minimap:GetLeft()
+        local right = Minimap:GetRight()
+        local bottom = Minimap:GetBottom()
+        local top = Minimap:GetTop()
+
+        local isOver = left and mx >= (left - MARGIN) and mx <= (right + MARGIN)
+                        and my >= (bottom - MARGIN) and my <= (top + MARGIN)
+
+        if isOver then
+            self.leaveTime = nil
+            if not self.isShown then
+                SetButtonsAlpha(1)
+                self.isShown = true
+            end
+        else
+            if self.isShown then
+                if not self.leaveTime then
+                    self.leaveTime = GetTime()
+                elseif GetTime() - self.leaveTime >= HIDE_DELAY then
+                    SetButtonsAlpha(0)
+                    self.isShown = false
+                    self.leaveTime = nil
+                end
+            end
+        end
+    end)
+end
+
+module.disable = function(self)
+    if self.frame then
+        self.frame:SetScript("OnUpdate", nil)
+    end
+    -- On remet tous les boutons visibles quand on desactive le module
+    SetButtonsAlpha(1)
+end
