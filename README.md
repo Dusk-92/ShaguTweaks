@@ -27,22 +27,22 @@ Same steps, but rename the folder to `ShaguTweaks-tbc`.
 - **Energy & Mana Tick**
 *Adds an energy & mana tick to the player frame.*
 
-- **Clean Minimap** 🧭
+- **Clean Minimap** 
 *Hides minimap addon buttons automatically when the cursor leaves the minimap area.*
 
 - **Minimap Zoom**
 *Increases the minimap size and shifts buff icons left to prevent overlap.*
 
-- **XP Bar Text** 📊
+- **XP Bar Text** 
 *Always shows current XP and rested bonus percentage directly on the experience bar — fixed for OctoWoW.*
 
-- **Free Slots Count** 🎒
+- **Free Slots Count** 
 *Shows free slot counts on the backpack button: class bag slots (top right), reagent bag slots (bottom left), and total free slots (bottom right).*
 
-- **Loot Cursor** 🖱️
+- **Loot Cursor** 
 *Positions the loot window directly under your cursor so you can loot without moving your mouse.*
 
-- **No Toggle** ⚔️
+- **No Toggle** 
 *Keeps Auto Attack, Auto Shot, and Shoot active when re-pressed, preventing accidental cancellation.*
 
 ---
