@@ -51,6 +51,7 @@ mods\minimap-square.lua
 mods\minimap-tweaks.lua
 mods\minimap-clean.lua
 mods\minimap-zoom.lua
+mods\minimap-tracking.lua
 mods\free-slots.lua
 mods\xpbar-text.lua
 mods\nameplate-scale.lua
