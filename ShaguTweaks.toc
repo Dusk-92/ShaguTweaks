@@ -90,3 +90,4 @@ mods\superwow.lua
 mods\reduced-actionbar.lua
 mods\no-toggle.lua
 mods\loot-cursor.lua
+mods\improved-roll-frames.lua
