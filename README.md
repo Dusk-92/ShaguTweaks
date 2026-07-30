@@ -31,7 +31,8 @@ Same steps, but rename the folder to `ShaguTweaks-tbc`.
 - **Free Slots Count** — Shows free slot counts on the backpack button: class bag slots (top right), reagent bag slots (bottom left), and total free slots (bottom right).
 - **Loot Cursor** — Positions the loot window directly under your cursor so you can loot without moving your mouse.
 - **No Toggle** — Keeps Auto Attack, Auto Shot, and Shoot active when re-pressed, preventing accidental cancellation.
-
+- **Range Color** — Action buttons will be colored red when out of range.
+- **Hide Tracking Icon** — Hides the tracking icon from the minimap.
 ---
 
 ## ⚙️ Original Features
