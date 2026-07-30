@@ -33,6 +33,7 @@ Same steps, but rename the folder to `ShaguTweaks-tbc`.
 - **No Toggle** — Keeps Auto Attack, Auto Shot, and Shoot active when re-pressed, preventing accidental cancellation.
 - **Range Color** — Action buttons will be colored red when out of range.
 - **Hide Tracking Icon** — Hides the tracking icon from the minimap.
+- **Improved Roll Frames** — Smaller roll frames with roll tracking
 ---
 
 ## ⚙️ Original Features
