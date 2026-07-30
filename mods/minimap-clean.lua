@@ -25,7 +25,6 @@ local ignoreList = {
     "RecipeRadarMinimapIcon",
     "FWGMinimapPOI",
     "MBB_MinimapButtonFrame",
-    "MinimapButtonFrame",  -- MBB peut nommer sa frame sans le prefixe MBB_ selon les versions
     "QuestieNote",
     "MetaMap",
     "LootLinkMinimapButton",
@@ -73,13 +72,8 @@ end
 local function SetButtonsAlpha(alpha)
     local children = {Minimap:GetChildren()}
     for _, child in ipairs(children) do
-        -- pcall ici : si un autre addon (MBB, etc.) est en train de detruire/
-        -- reparenter sa frame au meme moment, un appel direct sur un objet
-        -- dans un etat incoherent peut planter le client. On isole l'appel
-        -- pour qu'une frame problematique ne fasse pas tomber tout le module.
-        local ok, isButton = pcall(IsAddonButton, child)
-        if ok and isButton then
-            pcall(child.SetAlpha, child, alpha)
+        if IsAddonButton(child) then
+            child:SetAlpha(alpha)
         end
     end
 end
