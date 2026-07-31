@@ -6,7 +6,7 @@ local module = ShaguTweaks:register({
   description = T["Hides minimap addon buttons automatically when the cursor leaves the minimap area."],
   expansions = { ["vanilla"] = true, ["tbc"] = true },
   category = T["World & MiniMap"],
-  enabled = true,
+  enabled = false,
 })
 
 -- 🛡️ Liste noire : tout ce qu'on ne veut PAS toucher (trackers, blips, boutons systeme...)
