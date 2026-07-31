@@ -18,7 +18,7 @@ module.enable = function(self)
             if ( this.rangeTimer <= 0.2 ) then -- 0.1
                 if ( IsActionInRange( ActionButton_GetPagedID(this)) == 0 ) then
                     if not this.a then
-                        this.r,this.g,this.b,this.a = 0.9, 0.35, 0.35, 1 -- out of range colour
+                        this.r,this.g,this.b,this.a = 1, 0.2, 0.05, 1 -- out of range colour
                     end
                     _G[this:GetName() .. 'Icon']:SetVertexColor(this.r, this.g, this.b, this.a)
                     elseif IsUsableAction(ActionButton_GetPagedID(this)) then
