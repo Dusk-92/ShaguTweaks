@@ -9,7 +9,7 @@ local module = ShaguTweaks:register({
   description = T["Estimates health numbers, and shows numbers on player, pet and target unit frames."],
   expansions = { ["vanilla"] = true, ["tbc"] = true },
   category = T["Unit Frames"],
-  enabled = true,
+  enabled = false,
 })
 
 module.enable = function(self)
