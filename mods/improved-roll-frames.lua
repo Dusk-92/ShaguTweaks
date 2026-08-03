@@ -10,7 +10,7 @@ local module = ShaguTweaks:register({
 
 module.enable = function(self)
     local _G = ShaguTweaks.GetGlobalEnv()
-    local font_default, font_size = "Fonts\\skurri.TTF", 14
+    local font_default, font_size = "Fonts\\skurri.TTF", 15
 
     ShaguTweaks.roll = CreateFrame("Frame", "STLootRoll", UIParent)
     ShaguTweaks.roll.frames = {}
@@ -88,10 +88,10 @@ module.enable = function(self)
     end
 
     function ShaguTweaks.roll:CreateLootRoll(id)
-    local size = 20
+    local size = 22
     -- local rawborder, border = GetBorderSize()
     local border = 4
-    local esize = 20
+    local esize = 22
     local f = CreateFrame("Frame", "STLootRollFrame" .. id, UIParent)
 
     local function CreateBackdrop(f,b,a)
@@ -116,7 +116,7 @@ module.enable = function(self)
     f.backdrop:SetFrameStrata("BACKGROUND")
     f.hasItem = 1
 
-    f:SetWidth(350)
+    f:SetWidth(385)
     f:SetHeight(size)
 
     f.icon = CreateFrame("Button", "STLootRollFrame" .. id .. "Icon", f)
