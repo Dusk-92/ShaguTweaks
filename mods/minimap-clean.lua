@@ -4,7 +4,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
   title = T["Minimap Clean"],
   description = T["Hides minimap addon buttons automatically when the cursor leaves the minimap area."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["World & MiniMap"],
   enabled = false,
 })
