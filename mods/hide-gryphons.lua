@@ -4,7 +4,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
   title = T["Hide Gryphons"],
   description = T["Hides the gryphons left and right of the action bar."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["Action Bar"],
   enabled = nil,
 })
