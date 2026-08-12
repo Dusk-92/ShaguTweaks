@@ -7,7 +7,7 @@ local HookAddonOrVariable = ShaguTweaks.HookAddonOrVariable
 local module = ShaguTweaks:register({
   title = T["Item Rarity Borders"],
   description = T["Show item rarity as the border color on bags, bank, character and inspect frames."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["Tooltip & Items"],
   enabled = true,
 })
