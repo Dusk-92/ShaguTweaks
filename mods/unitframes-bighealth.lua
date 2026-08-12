@@ -4,7 +4,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
   title = T["Unit Frame Big Health"],
   description = T["Increases the healthbar of the player and target unitframe."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["Unit Frames"],
   enabled = nil,
 })
