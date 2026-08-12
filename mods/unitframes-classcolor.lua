@@ -4,7 +4,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
   title = T["Unit Frame Class Colors"],
   description = T["Adds class colors to the player, target and party unit frames."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["Unit Frames"],
   enabled = nil,
 })
