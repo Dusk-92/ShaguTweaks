@@ -7,7 +7,7 @@ local UnitChannelInfo = ShaguTweaks.UnitChannelInfo
 local module = ShaguTweaks:register({
   title = T["Enemy Castbars"],
   description = T["Shows an enemy castbar on target unit frame."],
-  expansions = { ["vanilla"] = true, ["tbc"] = nil },
+  expansions = { ["vanilla"] = true },
   category = T["Unit Frames"],
   enabled = true,
 })
