@@ -3,7 +3,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
     title = T["Improved Roll Frames"],
     description = T["Smaller roll frames with roll tracking."],
-    expansions = { ["vanilla"] = true, ["tbc"] = nil },
+    expansions = { ["vanilla"] = true },
     category = T["General"],
     enabled = nil,
   })
