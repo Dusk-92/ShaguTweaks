@@ -15,7 +15,10 @@ local COOLDOWN = 70
 -- how often (in seconds) the message cache gets pruned of stale entries
 local CLEAN_INTERVAL = 30
 
--- double-buffered cache of {message = last_seen_time}, avoids ever growing unbounded
+-- double-buffered cache of [frame] = {message = last_seen_time}, keyed per
+-- chat frame so that a message shown in one tab (e.g. "General") doesn't
+-- get treated as a duplicate when it also needs to show in another tab
+-- (e.g. a custom "World" tab)
 local cache = { {}, {}, INDEX = 1 }
 
 local function IsGuildMate(name)
@@ -40,17 +43,23 @@ local function IsFriendOf(name)
 end
 
 -- returns true (and records the message) if this exact text was already seen
--- within the cooldown window
-local function IsDuplicate(msg)
+-- on this specific chat frame within the cooldown window
+local function IsDuplicate(frame, msg)
   local time = GetTime()
   local index = cache.INDEX
 
-  local seen_at = cache[index][msg]
+  local frameCache = cache[index][frame]
+  if not frameCache then
+    frameCache = {}
+    cache[index][frame] = frameCache
+  end
+
+  local seen_at = frameCache[msg]
   if seen_at and (seen_at + COOLDOWN) > time then
     return true
   end
 
-  cache[index][msg] = time
+  frameCache[msg] = time
   return false
 end
 
@@ -71,9 +80,12 @@ module.enable = function(self)
     local index = cache.INDEX
     local newindex = (index == 1) and 2 or 1
 
-    for msg, seen_at in pairs(cache[index]) do
-      if (seen_at + COOLDOWN) > time then
-        cache[newindex][msg] = seen_at
+    for frame, frameCache in pairs(cache[index]) do
+      for msg, seen_at in pairs(frameCache) do
+        if (seen_at + COOLDOWN) > time then
+          cache[newindex][frame] = cache[newindex][frame] or {}
+          cache[newindex][frame][msg] = seen_at
+        end
       end
     end
 
@@ -100,7 +112,7 @@ module.enable = function(self)
       local isChatType = event == "CHAT_MSG_SAY" or event == "CHAT_MSG_CHANNEL" or event == "CHAT_MSG_YELL"
       local isStrangerEmote = event == "CHAT_MSG_EMOTE" and not (IsGuildMate(arg2) or IsFriendOf(arg2))
 
-      if (isChatType or isStrangerEmote) and IsDuplicate(arg1) then
+      if (isChatType or isStrangerEmote) and IsDuplicate(this, arg1) then
         return
       end
     end
