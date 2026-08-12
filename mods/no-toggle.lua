@@ -4,7 +4,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
   title = T["No Toggle Auto-Attack"],
   description = T["Keeps Auto Attack, Auto Shot, and Shoot active when re-pressed, preventing accidental cancellation."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["Action Bar"],
   enabled = true,
   order = 12,
