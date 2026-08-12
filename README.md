@@ -17,9 +17,6 @@ The goal stays the same: stay non-intrusive to the default UI, while giving you 
 4. Copy it into `Wow-Directory\Interface\AddOns`
 5. Restart WoW
 
-**The Burning Crusade (2.4.3)**
-Same steps, but rename the folder to `ShaguTweaks-tbc`.
-
 ---
 
 ## 🆕 Custom mods (added on top of the original)
