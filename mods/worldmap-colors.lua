@@ -4,7 +4,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
   title = T["WorldMap Class Colors"],
   description = T["Show class colored circles on world and battlefield map."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["World & MiniMap"],
   enabled = true,
 })
