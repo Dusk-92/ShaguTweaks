@@ -35,7 +35,8 @@ end
 local function IsFriendOf(name)
   if not name then return false end
   for i = 1, GetNumFriends() do
-    if GetFriendInfo(i) == name then
+    local fname = GetFriendInfo(i)
+    if fname and strlower(fname) == strlower(name) then
       return true
     end
   end
@@ -68,6 +69,13 @@ end
 local GetPlayerName = GetUnitName or UnitName
 
 module.enable = function(self)
+  -- force an early guild roster sync: GetNumGuildMembers() returns 0 until
+  -- the roster has been fetched at least once, which would otherwise let
+  -- guildmate emotes get filtered right after login/reload
+  if IsInGuild() then
+    GuildRoster()
+  end
+
   -- periodically swap/prune the cache so it never grows forever
   local cleaner = CreateFrame("Frame")
   local elapsed_total = 0
