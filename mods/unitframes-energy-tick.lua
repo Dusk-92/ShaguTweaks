@@ -3,7 +3,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
   title = T["Unit Frame Energy & Mana Tick"],
   description = T["Adds an energy & mana tick to the player frame."],
-  expansions = { ["vanilla"] = true, ["tbc"] = nil },
+  expansions = { ["vanilla"] = true },
   category = T["Unit Frames"],
   enabled = nil,
 })
