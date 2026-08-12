@@ -78,6 +78,7 @@ mods\tooltip-details.lua
 mods\hide-errors.lua
 mods\chat-tweaks.lua
 mods\chat-levels.lua
+mods\chat-spam-filter.lua
 mods\hide-gryphons.lua
 mods\worldmap-colors.lua
 mods\unitframes-bighealth.lua
