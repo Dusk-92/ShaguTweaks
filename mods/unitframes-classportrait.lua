@@ -28,7 +28,7 @@ local CLASS_ICON_TCOORDS = {
 local module = ShaguTweaks:register({
   title = T["Unit Frame Class Portraits"],
   description = T["Replace unitframe portraits with class icons."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["Unit Frames"],
   enabled = nil,
 })
