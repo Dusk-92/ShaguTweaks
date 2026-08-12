@@ -7,7 +7,7 @@ local GetItemIDFromLink = ShaguTweaks.GetItemIDFromLink
 local module = ShaguTweaks:register({
   title = T["Vendor Values"],
   description = T["Shows the vendor sell values on all item tooltips."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["Tooltip & Items"],
   enabled = true,
 })
