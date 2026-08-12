@@ -5,7 +5,7 @@ local hooksecurefunc = hooksecurefunc or ShaguTweaks.hooksecurefunc
 local module = ShaguTweaks:register({
   title = T["Reduced Actionbar Size"],
   description = T["Reduces the actionbar size by removing several items such as the bag panel and microbar"],
-  expansions = { ["vanilla"] = true, ["tbc"] = nil },
+  expansions = { ["vanilla"] = true },
   category = T["Action Bar"],
   enabled = nil,
 })
