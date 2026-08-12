@@ -5,7 +5,7 @@ local strsplit = ShaguTweaks.strsplit
 local module = ShaguTweaks:register({
   title = T["Auto Stance"],
   description = T["Automatically switch to the required warrior or druid stance on spell cast."],
-  expansions = { ["vanilla"] = true, ["tbc"] = nil },
+  expansions = { ["vanilla"] = true },
   enabled = true,
 })
 
