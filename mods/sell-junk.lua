@@ -5,7 +5,7 @@ local GetItemIDFromLink = ShaguTweaks.GetItemIDFromLink
 local module = ShaguTweaks:register({
   title = T["Sell Junk"],
   description = T["Adds a “Sell Junk” button to every merchant window, that sells all grey items."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["Tooltip & Items"],
   enabled = true,
 })
