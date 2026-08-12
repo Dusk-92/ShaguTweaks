@@ -4,7 +4,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
   title = T["Hide Tracking Icon"],
   description = T["Hides the tracking icon from the minimap."],
-  expansions = { ["vanilla"] = true, ["tbc"] = nil },
+  expansions = { ["vanilla"] = true },
   category = T["World & MiniMap"],
   enabled = true,
   order = 74,
