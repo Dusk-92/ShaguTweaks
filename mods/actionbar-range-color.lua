@@ -5,7 +5,7 @@ local hooksecurefunc = ShaguTweaks.hooksecurefunc
 local module = ShaguTweaks:register({
     title = T["Range Color"],
     description = T["Action buttons will be colored red when out of range."],
-    expansions = { ["vanilla"] = true, ["tbc"] = nil },
+    expansions = { ["vanilla"] = true },
     category = T["Action Bar"],
     enabled = nil,
 })
