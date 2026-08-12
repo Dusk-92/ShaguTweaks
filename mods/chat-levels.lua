@@ -6,7 +6,7 @@ local rgbhex = ShaguTweaks.rgbhex
 local module = ShaguTweaks:register({
     title = T["Chat Levels"],
     description = T["Shows player levels in chat."],
-    expansions = { ["vanilla"] = true, ["tbc"] = nil },
+    expansions = { ["vanilla"] = true },
     category = T["Social & Chat"],
     enabled = nil,
 })
