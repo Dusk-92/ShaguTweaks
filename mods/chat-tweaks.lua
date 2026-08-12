@@ -15,7 +15,7 @@ local friendinfo = gsub(gsub(FRIENDS_LEVEL_TEMPLATE,"%%s","%%s %%s"),"%%d","%%s"
 local module = ShaguTweaks:register({
   title = T["Chat Tweaks"],
   description = T["Improves chat with mouse wheel scrolling, sticky channels, arrow-up repeat, shortened names, item link preview, Alt/Ctrl-click to invite/target, right-click ignore, chat history, and class colors."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["Social & Chat"],
   enabled = true,
   order = 60,
