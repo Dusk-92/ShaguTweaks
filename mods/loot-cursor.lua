@@ -4,7 +4,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
   title = T["Loot Cursor"],
   description = T["Positions the loot window directly under your cursor so you can loot without moving your mouse."],
-  expansions = { ["vanilla"] = true, ["tbc"] = nil },
+  expansions = { ["vanilla"] = true },
   category = T["General"],
   enabled = true,
   order = 44,
