@@ -1,0 +1,110 @@
+local _G = ShaguTweaks.GetGlobalEnv()
+local T = ShaguTweaks.T
+
+local module = ShaguTweaks:register({
+  title = T["Chat Spam Filter"],
+  description = T["Hides repeated messages in say/yell/channel chat (70s cooldown per unique message). Also suppresses BigWigs cast spam and #showtooltip errors."],
+  expansions = { ["vanilla"] = true, ["tbc"] = nil },
+  category = T["Social & Chat"],
+  enabled = nil,
+})
+
+-- how long (in seconds) a given message text stays "known" and gets suppressed on repeat
+local COOLDOWN = 70
+
+-- how often (in seconds) the message cache gets pruned of stale entries
+local CLEAN_INTERVAL = 30
+
+-- double-buffered cache of {message = last_seen_time}, avoids ever growing unbounded
+local cache = { {}, {}, INDEX = 1 }
+
+local function IsGuildMate(name)
+  if not name or not IsInGuild() then return false end
+  for i = 1, GetNumGuildMembers() do
+    local rname = GetGuildRosterInfo(i)
+    if rname and strlower(rname) == strlower(name) then
+      return true
+    end
+  end
+  return false
+end
+
+local function IsFriendOf(name)
+  if not name then return false end
+  for i = 1, GetNumFriends() do
+    if GetFriendInfo(i) == name then
+      return true
+    end
+  end
+  return false
+end
+
+-- returns true (and records the message) if this exact text was already seen
+-- within the cooldown window
+local function IsDuplicate(msg)
+  local time = GetTime()
+  local index = cache.INDEX
+
+  local seen_at = cache[index][msg]
+  if seen_at and (seen_at + COOLDOWN) > time then
+    return true
+  end
+
+  cache[index][msg] = time
+  return false
+end
+
+-- SuperWoW exposes GetUnitName (faster / more reliable than UnitName),
+-- fall back to the vanilla API if it's not loaded
+local GetPlayerName = GetUnitName or UnitName
+
+module.enable = function(self)
+  -- periodically swap/prune the cache so it never grows forever
+  local cleaner = CreateFrame("Frame")
+  local elapsed_total = 0
+  cleaner:SetScript("OnUpdate", function()
+    elapsed_total = elapsed_total + arg1
+    if elapsed_total < CLEAN_INTERVAL then return end
+    elapsed_total = 0
+
+    local time = GetTime()
+    local index = cache.INDEX
+    local newindex = (index == 1) and 2 or 1
+
+    for msg, seen_at in pairs(cache[index]) do
+      if (seen_at + COOLDOWN) > time then
+        cache[newindex][msg] = seen_at
+      end
+    end
+
+    cache[index] = {}
+    cache.INDEX = newindex
+  end)
+
+  local Original_ChatFrame_OnEvent = ChatFrame_OnEvent
+
+  ChatFrame_OnEvent = function(event)
+    -- suppress "#showtooltip" macro errors leaking into chat
+    if strfind(arg1 or "", "^#showtooltip") then
+      return
+    end
+
+    -- suppress BigWigs "Casted X on Y" cast announcements
+    if event == "CHAT_MSG_SAY" and strfind(arg1 or "", "^Casted %u[%a%s]+ on %u[%a%s]+") then
+      return
+    end
+
+    -- hide repeated messages in say/yell/channel chat, and emotes from
+    -- strangers (guildmates/friends are never filtered on emote)
+    if arg1 and arg2 and arg2 ~= GetPlayerName("player") then
+      local isChatType = event == "CHAT_MSG_SAY" or event == "CHAT_MSG_CHANNEL" or event == "CHAT_MSG_YELL"
+      local isStrangerEmote = event == "CHAT_MSG_EMOTE" and not (IsGuildMate(arg2) or IsFriendOf(arg2))
+
+      if (isChatType or isStrangerEmote) and IsDuplicate(arg1) then
+        return
+      end
+    end
+
+    return Original_ChatFrame_OnEvent(event)
+  end
+end
