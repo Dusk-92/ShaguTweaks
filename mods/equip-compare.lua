@@ -4,7 +4,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
   title = T["Equip Compare"],
   description = T["Shows currently equipped items on tooltips while the shift key is pressed."],
-  expansions = { ["vanilla"] = true, ["tbc"] = nil },
+  expansions = { ["vanilla"] = true },
   category = T["Tooltip & Items"],
   enabled = true,
 })
