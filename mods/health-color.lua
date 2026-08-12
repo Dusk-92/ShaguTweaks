@@ -7,7 +7,7 @@ local vanilla = ShaguTweaks.GetExpansion() == "vanilla" or nil
 local module = ShaguTweaks:register({
   title = T["Unit Frame Health Colors"],
   description = T["Change health text color based on its value."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["Unit Frames"],
   enabled = nil,
 })
