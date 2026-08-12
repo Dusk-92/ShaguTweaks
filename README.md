@@ -1,6 +1,6 @@
 # 🧩 ShaguTweaks
 
-> **A small World of Warcraft (1.12.1 / 2.4.3) AddOn for those who don't want to use any AddOns at all.**
+> **A small World of Warcraft (1.12.1) AddOn for those who don't want to use any AddOns at all.**
 
 This is a **fork of [shagu/ShaguTweaks](https://github.com/shagu/ShaguTweaks)**, patched for **OctoWoW / Turtle WoW**, with several new custom mods added and existing ones tweaked.
 
@@ -38,7 +38,7 @@ The goal stays the same: stay non-intrusive to the default UI, while giving you 
 
 - **Auto Dismount** — Automatically dismounts whenever a spell is cast.
 - **Auto Stance** — Automatically switches to the required warrior/druid stance on spell cast.
-- **Blue Shaman Class Colors** — Changes shaman class color to blue, as in TBC+.
+- **Blue Shaman Class Colors** — Changes shaman class color to blue, as in +.
 - **Chat Hyperlinks** — Copy website URLs from chat, turns CLINKs into real items, handles quest/player links.
 - **Chat Tweaks** — Mouse wheel scroll, sticky chat channels, repeat message on arrow up.
 - **Cooldown Numbers** — Shows remaining cooldown duration as text.
