@@ -13,7 +13,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
   title = T["Super WoW Compatibility"],
   description = T["Adds compatibility for the SuperWoW client mod."],
-  expansions = { ["vanilla"] = true, ["tbc"] = false },
+  expansions = { ["vanilla"] = true },
   category = T["General"],
   enabled = true,
 })
