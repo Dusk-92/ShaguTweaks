@@ -4,7 +4,7 @@ local T = ShaguTweaks.T
 local module = ShaguTweaks:register({
   title = T["Movable Unit Frames"],
   description = T["Player and Target unit frames can be moved while <Shift> and <Ctrl> are pressed together."],
-  expansions = { ["vanilla"] = true, ["tbc"] = true },
+  expansions = { ["vanilla"] = true },
   category = T["Unit Frames"],
   enabled = true,
 })
