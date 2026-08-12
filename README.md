@@ -34,6 +34,7 @@ Same steps, but rename the folder to `ShaguTweaks-tbc`.
 - **Range Color** — Action buttons will be colored red when out of range.
 - **Hide Tracking Icon** — Hides the tracking icon from the minimap.
 - **Improved Roll Frames** — Smaller roll frames with roll tracking
+- **Chat Spam Filter** — Hides repeated messages in say/yell/channel chat (70s cooldown per unique message). Also suppresses BigWigs cast spam and #showtooltip errors.
 ---
 
 ## ⚙️ Original Features
