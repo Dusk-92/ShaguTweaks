@@ -30,7 +30,8 @@ The goal stays the same: stay non-intrusive to the default UI, while giving you 
 - **No Toggle** — Keeps Auto Attack, Auto Shot, and Shoot active when re-pressed, preventing accidental cancellation.
 - **Range Color** — Action buttons will be colored red when out of range.
 - **Hide Tracking Icon** — Hides the tracking icon from the minimap.
-- **Improved Roll Frames** — Smaller roll frames with roll tracking
+- **Improved Roll Frames** — Smaller roll frames with roll tracking.
+- **Improved Castbar** — Adds a spell icon and remaining cast time to the cast bar.
 - **Chat Spam Filter** — Hides repeated messages in say/yell/channel chat (70s cooldown per unique message). Also suppresses BigWigs cast spam and #showtooltip errors.
 ---
 
