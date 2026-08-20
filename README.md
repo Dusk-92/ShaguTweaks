@@ -34,6 +34,7 @@ The goal stays the same: stay non-intrusive to the default UI, while giving you 
 - **Improved Castbar** — Adds a spell icon and remaining cast time to the cast bar.
 - **Chat Spam Filter** — Hides repeated messages in say/yell/channel chat (70s cooldown per unique message). Also suppresses BigWigs cast spam and #showtooltip errors.
 - **Smaller Error Frame** — Resizes the error frame to 1 line instead of 3.
+- **Skip Gossip Text** — Skip gossip text when interacting with NPCs unless holding shift.
 ---
 
 ## ⚙️ Original Features
