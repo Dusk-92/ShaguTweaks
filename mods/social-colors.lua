@@ -24,6 +24,14 @@ do -- add class colors to chat
       if _G["ChatFrame"..i] and not _G["ChatFrame"..i].HookAddMessageColor and not Prat then
         _G["ChatFrame"..i].HookAddMessageColor = _G["ChatFrame"..i].AddMessage
         _G["ChatFrame"..i].AddMessage = function(frame, text, a1, a2, a3, a4, a5)
+          -- Chat Tweaks already owns chat class coloring in this fork. Keep
+          -- Social Colors responsible for Guild/Friends/Who, but avoid doing
+          -- the same player-link parsing twice when both modules are enabled.
+          if frame.ShaguTweaksChatTweaksHooked then
+            _G["ChatFrame"..i].HookAddMessageColor(frame, text, a1, a2, a3, a4, a5)
+            return
+          end
+
           if text then
             for name in gfind(text, "|Hplayer:(.-)|h") do
               local real = strsplit(":", name)
