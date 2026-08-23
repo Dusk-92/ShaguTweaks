@@ -57,6 +57,34 @@ API.UnitChannelInfo = function(unit)
   end
 end
 
+-- ShaguTweaks' castbar modules use the old 1.12-compatible seven-value shape.
+-- Keep that public shape while sourcing the data from ClassicAPI first.
+API.GetCastInfo = function(unit)
+  if not API.casts then return end
+
+  local name, displayName, texture, startTime, endTime, isTradeSkill,
+    castID, notInterruptible, spellID = _G.C_Spell.UnitCastingInfo(unit)
+
+  -- Remote channels seen after they started can have metadata but no timing.
+  -- Castbars require start/end times, so only expose complete timing data here.
+  if not name or not startTime or not endTime then return end
+
+  return name, "", displayName or "", texture, startTime, endTime,
+    isTradeSkill, castID, notInterruptible, spellID
+end
+
+API.GetChannelInfo = function(unit)
+  if not API.casts then return end
+
+  local name, displayName, texture, startTime, endTime, isTradeSkill,
+    notInterruptible, spellID = _G.C_Spell.UnitChannelInfo(unit)
+
+  if not name or not startTime or not endTime then return end
+
+  return name, "", displayName or "", texture, startTime, endTime,
+    isTradeSkill, notInterruptible, spellID
+end
+
 API.GetSpellInfo = function(spell, bookType)
   if API.spellinfo then
     return _G.GetSpellInfo(spell, bookType)
