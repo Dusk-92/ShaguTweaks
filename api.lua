@@ -18,6 +18,20 @@ API.casts = type(_G.C_Spell) == "table"
   and type(_G.C_Spell.UnitCastingInfo) == "function"
   and type(_G.C_Spell.UnitChannelInfo) == "function"
 
+API.spellinfo = type(_G.GetSpellInfo) == "function"
+
+API.inventory = type(_G.C_Container) == "table"
+  and type(_G.C_Container.GetContainerNumFreeSlots) == "function"
+
+API.merchant = type(_G.C_MerchantFrame) == "table"
+  and type(_G.C_MerchantFrame.GetNumJunkItems) == "function"
+  and type(_G.C_MerchantFrame.SellAllJunkItems) == "function"
+
+API.playerstate = type(_G.IsMounted) == "function"
+  and type(_G.Dismount) == "function"
+  and type(_G.GetShapeshiftFormID) == "function"
+  and type(_G.CancelShapeshiftForm) == "function"
+
 API.unitguid = type(_G.UnitGUID) == "function"
 
 -- SuperWoW remains optional. It can still provide useful extra cast/GUID
@@ -41,6 +55,49 @@ API.UnitChannelInfo = function(unit)
   if API.casts then
     return _G.C_Spell.UnitChannelInfo(unit)
   end
+end
+
+API.GetSpellInfo = function(spell, bookType)
+  if API.spellinfo then
+    return _G.GetSpellInfo(spell, bookType)
+  end
+end
+
+API.GetContainerNumFreeSlots = function(bag)
+  if API.inventory then
+    return _G.C_Container.GetContainerNumFreeSlots(bag)
+  end
+  return 0, 0
+end
+
+API.GetNumJunkItems = function()
+  if API.merchant then
+    return _G.C_MerchantFrame.GetNumJunkItems()
+  end
+  return 0
+end
+
+API.SellAllJunkItems = function()
+  if API.merchant then
+    return _G.C_MerchantFrame.SellAllJunkItems()
+  end
+end
+
+API.IsMounted = function()
+  return API.playerstate and _G.IsMounted() or false
+end
+
+API.Dismount = function()
+  if API.playerstate then return _G.Dismount() end
+end
+
+API.GetShapeshiftFormID = function()
+  if API.playerstate then return _G.GetShapeshiftFormID() end
+  return 0
+end
+
+API.CancelShapeshiftForm = function()
+  if API.playerstate then return _G.CancelShapeshiftForm() end
 end
 
 API.UnitGUID = function(unit)
