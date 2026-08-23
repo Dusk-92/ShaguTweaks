@@ -1,8 +1,9 @@
 local _G = ShaguTweaks.GetGlobalEnv()
 local T = ShaguTweaks.T
 local GetExpansion = ShaguTweaks.GetExpansion
-local UnitCastingInfo = ShaguTweaks.UnitCastingInfo
-local UnitChannelInfo = ShaguTweaks.UnitChannelInfo
+local API = ShaguTweaks.API
+local LegacyCastingInfo = ShaguTweaks.UnitCastingInfo
+local LegacyChannelInfo = ShaguTweaks.UnitChannelInfo
 
 local module = ShaguTweaks:register({
   title = T["Enemy Castbars"],
@@ -61,34 +62,63 @@ castbar.text:SetPoint("CENTER", castbar, "CENTER", 0, 0)
 local font, size, opts = castbar.text:GetFont()
 castbar.text:SetFont(font, size - 2, "THINOUTLINE")
 
+local function QueryLegacy(query)
+  if not query then return end
+
+  local cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill = LegacyCastingInfo(query)
+  if cast then
+    return cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill, false
+  end
+
+  local channel
+  channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill = LegacyChannelInfo(query)
+  if channel then
+    return channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill, true
+  end
+end
+
+local function QueryCast(unit)
+  if not unit then return end
+
+  -- ClassicAPI is authoritative for real unit tokens and provides exact
+  -- engine/server timing. Keep the old parser only as a compatibility layer.
+  local cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill = API.GetCastInfo(unit)
+  if cast then
+    return cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill, false
+  end
+
+  local channel
+  channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill = API.GetChannelInfo(unit)
+  if channel then
+    return channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill, true
+  end
+
+  -- SuperWoW remains a second source for GUID-keyed casts when available.
+  if ShaguTweaks.superwow_active and not UnitIsUnit(unit, "player") then
+    local _, guid = UnitExists(unit)
+    if guid then
+      local a, b, c, d, e, f, g, h = QueryLegacy(guid)
+      if a then return a, b, c, d, e, f, g, h end
+    end
+  end
+
+  return QueryLegacy(unit)
+end
+
 module.enable = function(self)
   local oldUpdate = TargetFrame:GetScript("OnUpdate")
   TargetFrame:SetScript("OnUpdate", function(arg)
     if oldUpdate then oldUpdate(arg) end
 
-    local query = this.unit
-    local channel = false
+    local unit = this.unit or "target"
+    local cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill, isChannel = QueryCast(unit)
 
-    -- try to read cast and guid from SuperWoW (except for self casts)
-    if ShaguTweaks.superwow_active and this.unit and not UnitIsUnit(this.unit, 'player') then
-      local _, guid = UnitExists(this.unit)
-      query = guid or query
-    end
-
-    local cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill = UnitCastingInfo(query)
-    if not cast then
-      -- scan for channel spells if no cast was found
-      channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill = UnitChannelInfo(query)
-      cast = channel
-    end
-
-    if cast then
-      local channel = UnitChannelInfo(this.unit)
+    if cast and startTime and endTime and endTime > startTime then
       local duration = endTime - startTime
       local max = duration / 1000
       local cur = GetTime() - startTime / 1000
 
-      if channel then
+      if isChannel then
         cur = max + startTime/1000 - GetTime()
       end
 
@@ -96,7 +126,7 @@ module.enable = function(self)
       cur = cur < 0 and 0 or cur
 
       castbar:Show()
-      castbar:SetMinMaxValues(0, duration / 1000)
+      castbar:SetMinMaxValues(0, max)
       castbar:SetValue(cur)
 
       local percent = cur / max
