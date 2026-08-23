@@ -13,39 +13,10 @@ local movables = { "PlayerFrame", "TargetFrame" }
 
 module.enable = function(self)
   local unlocker = CreateFrame("Frame", nil, UIParent)
-  unlocker:SetAllPoints(UIParent)
 
   for _, frame in pairs(movables) do
     _G[frame]:SetClampedToScreen(true)
   end
-
-  unlocker.movable = nil
-  unlocker:SetScript("OnUpdate", function()
-    if IsShiftKeyDown() and IsControlKeyDown() then
-      if not unlocker.movable then
-        for _, frame in pairs(movables) do
-         _G[frame]:SetUserPlaced(true)
-         _G[frame]:SetMovable(true)
-         _G[frame]:EnableMouse(true)
-         _G[frame]:RegisterForDrag("LeftButton")
-         _G[frame]:SetScript("OnDragStart", function() this:StartMoving() end)
-         _G[frame]:SetScript("OnDragStop", function() this:StopMovingOrSizing() end)
-        end
-
-        unlocker.movable = true
-        unlocker.grid:Show()
-      end
-    elseif unlocker.movable then
-      for _, frame in pairs(movables) do
-       _G[frame]:SetScript("OnDragStart", function() end)
-       _G[frame]:SetScript("OnDragStop", function() end)
-       _G[frame]:StopMovingOrSizing()
-      end
-
-      unlocker.movable = nil
-      unlocker.grid:Hide()
-    end
-  end)
 
   unlocker.grid = CreateFrame("Frame", nil, WorldFrame)
   unlocker.grid:SetAllPoints(WorldFrame)
@@ -89,4 +60,37 @@ module.enable = function(self)
     line:SetPoint("TOPLEFT", unlocker.grid, "TOPLEFT", 0, -(i*hStep) + (size/2))
     line:SetPoint('BOTTOMRIGHT', unlocker.grid, 'TOPRIGHT', 0, -(i*hStep + size/2))
   end
+
+  local function UpdateMovableState()
+    local shouldMove = IsShiftKeyDown() and IsControlKeyDown()
+
+    if shouldMove and not unlocker.movable then
+      for _, frame in pairs(movables) do
+        _G[frame]:SetUserPlaced(true)
+        _G[frame]:SetMovable(true)
+        _G[frame]:EnableMouse(true)
+        _G[frame]:RegisterForDrag("LeftButton")
+        _G[frame]:SetScript("OnDragStart", function() this:StartMoving() end)
+        _G[frame]:SetScript("OnDragStop", function() this:StopMovingOrSizing() end)
+      end
+
+      unlocker.movable = true
+      unlocker.grid:Show()
+    elseif not shouldMove and unlocker.movable then
+      for _, frame in pairs(movables) do
+        _G[frame]:SetScript("OnDragStart", function() end)
+        _G[frame]:SetScript("OnDragStop", function() end)
+        _G[frame]:StopMovingOrSizing()
+      end
+
+      unlocker.movable = nil
+      unlocker.grid:Hide()
+    end
+  end
+
+  -- ClassicAPI provides MODIFIER_STATE_CHANGED. This replaces the old
+  -- every-frame Shift/Ctrl poll with work only when a modifier actually changes.
+  unlocker:RegisterEvent("MODIFIER_STATE_CHANGED")
+  unlocker:RegisterEvent("PLAYER_ENTERING_WORLD")
+  unlocker:SetScript("OnEvent", UpdateMovableState)
 end
