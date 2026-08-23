@@ -1,5 +1,6 @@
 local _G = ShaguTweaks.GetGlobalEnv()
 local T = ShaguTweaks.T
+local API = ShaguTweaks.API
 
 local module = ShaguTweaks:register({
   title = T["Sell Junk"],
@@ -25,7 +26,7 @@ local function CreateGoldString(money)
 end
 
 local function HasGreyItems()
-  return C_MerchantFrame.GetNumJunkItems() > 0
+  return API.GetNumJunkItems() > 0
 end
 
 module.enable = function(self)
@@ -43,7 +44,7 @@ module.enable = function(self)
 
     -- ClassicAPI performs a real merchant sale and drains the queue one item
     -- per frame, without abusing UseContainerItem or a manual throttle.
-    C_MerchantFrame.SellAllJunkItems()
+    API.SellAllJunkItems()
   end)
 
   autovendor:SetScript("OnHide", function()
@@ -62,7 +63,7 @@ module.enable = function(self)
   -- This frame is visible only while ClassicAPI's short sell queue is active.
   -- Polling a single engine count here replaces repeated full bag scans.
   autovendor:SetScript("OnUpdate", function()
-    if this.started and C_MerchantFrame.GetNumJunkItems() == 0 then
+    if this.started and API.GetNumJunkItems() == 0 then
       this:Hide()
     end
   end)
