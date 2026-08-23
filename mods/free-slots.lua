@@ -1,5 +1,6 @@
 local _G = ShaguTweaks.GetGlobalEnv()
 local L, T = ShaguTweaks.L, ShaguTweaks.T
+local API = ShaguTweaks.API
 
 local module = ShaguTweaks:register({
   title = T["Free Slot Count"],
@@ -40,7 +41,7 @@ module.enable = function(self)
     local hasClass, hasReagent = false, false
 
     for bag = 0, 4 do
-      local free, family = C_Container.GetContainerNumFreeSlots(bag)
+      local free, family = API.GetContainerNumFreeSlots(bag)
       free = free or 0
       family = family or 0
 
