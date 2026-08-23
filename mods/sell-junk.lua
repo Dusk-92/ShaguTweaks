@@ -1,6 +1,5 @@
 local _G = ShaguTweaks.GetGlobalEnv()
 local T = ShaguTweaks.T
-local GetItemIDFromLink = ShaguTweaks.GetItemIDFromLink
 
 local module = ShaguTweaks:register({
   title = T["Sell Junk"],
@@ -9,8 +8,6 @@ local module = ShaguTweaks:register({
   category = T["Tooltip & Items"],
   enabled = true,
 })
-
-local processed = {}
 
 local function CreateGoldString(money)
   if type(money) ~= "number" then return "-" end
@@ -28,27 +25,7 @@ local function CreateGoldString(money)
 end
 
 local function HasGreyItems()
-  for bag = 0, 4, 1 do
-    for slot = 1, GetContainerNumSlots(bag), 1 do
-      local name = GetContainerItemLink(bag,slot)
-      if name and string.find(name,"ff9d9d9d") then return true end
-    end
-  end
-  return nil
-end
-
-local function GetNextGreyItem()
-  for bag = 0, 4, 1 do
-    for slot = 1, GetContainerNumSlots(bag), 1 do
-      local name = GetContainerItemLink(bag,slot)
-      if name and string.find(name,"ff9d9d9d") and not processed[bag.."x"..slot] then
-        processed[bag.."x"..slot] = true
-        return bag, slot
-      end
-    end
-  end
-
-  return nil, nil
+  return C_MerchantFrame.GetNumJunkItems() > 0
 end
 
 module.enable = function(self)
@@ -56,57 +33,44 @@ module.enable = function(self)
   autovendor:Hide()
 
   autovendor:SetScript("OnShow", function()
-    processed = {}
-    this.price = 0
-    this.count = 0
-  end)
+    this.startMoney = GetMoney()
+    this.started = HasGreyItems()
 
-  autovendor:SetScript("OnHide", function()
-    if this.count > 0 then
-      DEFAULT_CHAT_FRAME:AddMessage(T["Your vendor trash has been sold and you earned"] .. " " .. CreateGoldString(this.price))
-    end
-  end)
-
-  autovendor:SetScript("OnUpdate", function()
-    -- throttle to to one item per .1 second
-    if ( this.tick or 1) > GetTime() then return else this.tick = GetTime() + .1 end
-
-    -- scan for the next grey item
-    local bag, slot = GetNextGreyItem()
-    if not bag or not slot then
+    if not this.started then
       this:Hide()
       return
     end
 
-    -- double check to only sell grey
-    local name = GetContainerItemLink(bag,slot)
-    if not name or not string.find(name,"ff9d9d9d") then
-      return
+    -- ClassicAPI performs a real merchant sale and drains the queue one item
+    -- per frame, without abusing UseContainerItem or a manual throttle.
+    C_MerchantFrame.SellAllJunkItems()
+  end)
+
+  autovendor:SetScript("OnHide", function()
+    if this.started and this.startMoney then
+      local earned = GetMoney() - this.startMoney
+      if earned > 0 then
+        DEFAULT_CHAT_FRAME:AddMessage(T["Your vendor trash has been sold and you earned"] .. " " .. CreateGoldString(earned))
+      end
     end
 
-    -- get value
-    local _, icount = GetContainerItemInfo(bag, slot)
-    local itemID = GetItemIDFromLink(GetContainerItemLink(bag, slot))
-    local price = ShaguTweaks.SellValueDB[itemID] or 0
-    if this.price then
-      this.price = this.price + ( price * ( icount or 1 ) )
-      this.count = this.count + 1
+    this.started = nil
+    this.startMoney = nil
+    if this.button then this.button:Update() end
+  end)
+
+  -- This frame is visible only while ClassicAPI's short sell queue is active.
+  -- Polling a single engine count here replaces repeated full bag scans.
+  autovendor:SetScript("OnUpdate", function()
+    if this.started and C_MerchantFrame.GetNumJunkItems() == 0 then
+      this:Hide()
     end
-
-    -- abort if the merchant window disappeared
-    if not this.merchant then return end
-
-    -- clear cursor and sell the item
-    ClearCursor()
-    UseContainerItem(bag, slot)
   end)
 
   autovendor:RegisterEvent("MERCHANT_SHOW")
   autovendor:RegisterEvent("MERCHANT_CLOSED")
   autovendor:RegisterEvent("MERCHANT_UPDATE")
   autovendor:SetScript("OnEvent", function()
-    autovendor.button:Update()
-
     if event == "MERCHANT_CLOSED" then
       autovendor.merchant = nil
       autovendor:Hide()
@@ -114,6 +78,8 @@ module.enable = function(self)
       autovendor.merchant = true
       autovendor.button:Show()
     end
+
+    autovendor.button:Update()
 
     MerchantRepairText:SetText("")
     if MerchantRepairItemButton:IsShown() then
