@@ -1,5 +1,6 @@
 local _G = ShaguTweaks.GetGlobalEnv()
 local T = ShaguTweaks.T
+local API = ShaguTweaks.API
 
 local module = ShaguTweaks:register({
   title = T["Auto Dismount"],
@@ -99,17 +100,15 @@ module.enable = function(self)
       if arg1 == errorstring then
         -- ClassicAPI reads the real mounted/form state directly, avoiding a
         -- 32-buff tooltip scan in the normal case.
-        if IsMounted and IsMounted() and Dismount then
-          Dismount()
+        if API.IsMounted() then
+          API.Dismount()
           return
         end
 
-        if GetShapeshiftFormID and CancelShapeshiftForm then
-          local formID = GetShapeshiftFormID()
-          if removableForms[formID] then
-            CancelShapeshiftForm()
-            return
-          end
+        local formID = API.GetShapeshiftFormID()
+        if removableForms[formID] then
+          API.CancelShapeshiftForm()
+          return
         end
 
         -- Preserve compatibility with custom private-server auras/forms.
