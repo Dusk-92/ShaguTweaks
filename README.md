@@ -8,14 +8,24 @@ The goal stays the same: stay non-intrusive to the default UI, while giving you 
 
 ---
 
+## 🔌 Requirements
+
+- **[ClassicAPI](https://github.com/brues-code/ClassicAPI) — required.** This fork uses ClassicAPI for structured spell, cast, nameplate, bag, merchant and player-state data where it is more reliable than legacy tooltip/combat-log parsing. ShaguTweaks declares `!!!ClassicAPI` as a dependency and will not load without it.
+- **[SuperWoW](https://github.com/balakethelock/SuperWoW) — optional / recommended.** It remains supported as an additional compatibility source, especially for GUID-based cast information, but ClassicAPI is the primary API layer.
+
+Use the latest ClassicAPI version and follow its upstream installation instructions.
+
+---
+
 ## 📦 Installation
 
 **Vanilla (1.12)**
-1. Download the latest version
-2. Unpack the zip
-3. Rename the folder to `ShaguTweaks`
-4. Copy it into `Wow-Directory\Interface\AddOns`
-5. Restart WoW
+1. Install/update **ClassicAPI** first
+2. Download the latest ShaguTweaks version
+3. Unpack the zip
+4. Rename the folder to `ShaguTweaks`
+5. Copy it into `Wow-Directory\Interface\AddOns`
+6. Restart WoW
 
 ---
 
@@ -56,13 +66,13 @@ The goal stays the same: stay non-intrusive to the default UI, while giving you 
 - **MiniMap Square** — Square minimap instead of round.
 - **MiniMap Tweaks** — Hides unnecessary minimap buttons, mouse wheel zoom.
 - **Movable Unit Frames** — Move player/target frames with Shift+Ctrl.
-- **Nameplate Castbar** — Castbar on nameplates based on combat log estimation.
+- **Nameplate Castbar** — Castbar on nameplates using ClassicAPI cast state first, with legacy/SuperWoW fallbacks.
 - **Nameplate Class Colors** — Nameplate health bar colored by class.
 - **Nameplate Scale** — Nameplates honor UI-Scale setting.
 - **Reduced Actionbar Size** — Smaller action bar, removes bag panel/microbar.
 - **Sell Junk** — "Sell Junk" button at merchants, sells all grey items.
 - **Social Colors** — Class colors in Who, Guild, Friends and Chat.
-- **Enemy Castbars** — Enemy castbar on target frame.
+- **Enemy Castbars** — Enemy castbar on target frame using ClassicAPI timing first, with compatibility fallbacks.
 - **Debuff Timer** — Debuff durations shown on target frame.
 - **Tooltip Details** — Health, class color, guild name/rank, current target on tooltips.
 - **Unit Frame Big Health** — Bigger healthbars for player/target.
