@@ -18,7 +18,22 @@ local module = ShaguTweaks:register({
   enabled = true,
 })
 
+local function ChatTweaksOwnsSocialColors()
+  local configured = ShaguTweaks_config and ShaguTweaks_config[T["Chat Tweaks"]]
+  if configured ~= nil then return configured == 1 end
+
+  -- On a fresh install config defaults are initialized while modules are
+  -- enabled, so fall back to the registered module default when needed.
+  local chat = ShaguTweaks.mods and ShaguTweaks.mods[T["Chat Tweaks"]]
+  return chat and chat.enabled or false
+end
+
 module.enable = function(self)
+  -- Chat Tweaks currently contains the same social-color feature set. Avoid
+  -- duplicate AddMessage/Guild/Friends/Who hooks and a duplicate named frame,
+  -- while keeping Social Colors independent whenever Chat Tweaks is disabled.
+  if ChatTweaksOwnsSocialColors() then return end
+
 do -- add class colors to chat
     for i=1,NUM_CHAT_WINDOWS do
       if _G["ChatFrame"..i] and not _G["ChatFrame"..i].HookAddMessageColor and not Prat then
