@@ -200,6 +200,8 @@ ShaguTweaks.strsplit = function(delimiter, subject)
 end
 
 ShaguTweaks.rgbhex = function(r, g, b, a)
+  local _r, _g, _b, _a
+
   if type(r) == "table" then
     if r.r then
       _r, _g, _b, _a = r.r, r.g, r.b, (r.a or 1)
