@@ -25,9 +25,20 @@ local function SetAllPointsOffset(frame, parent, offset)
   frame:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -offset, offset)
 end
 
+local function IsMapVisible()
+  local worldmap = _G.WorldMapFrame
+  local battlefield = _G.BattlefieldMinimap
+  return (worldmap and worldmap:IsVisible()) or (battlefield and battlefield:IsVisible())
+end
+
 local function UpdateWorldMapColors()
-  -- throttle to to one item per .1 second
-  if ( this.tick or 1) > GetTime() then return else this.tick = GetTime() + .1 end
+  -- This module used to iterate up to 88 map buttons all the time, even when
+  -- both maps were closed. Keep the OnUpdate compatibility path, but make the
+  -- expensive work conditional on a visible map.
+  if not IsMapVisible() then return end
+
+  -- throttle to one update per .1 second
+  if (this.tick or 1) > GetTime() then return else this.tick = GetTime() + .1 end
 
   local frame, icon
 
@@ -63,19 +74,20 @@ local function UpdateWorldMapColors()
 
     if frame and UnitExists(unitstr) then
       icon = _G[name.."Icon"]
-      icon:SetTexture()
+      if icon then icon:SetTexture() end
 
       -- create icon if not yet existing
       if not frame.texture then
         frame.texture = frame:CreateTexture(nil, "OVERLAY")
-        SetAllPointsOffset(frame.texture, frame, 12, 12)
+        SetAllPointsOffset(frame.texture, frame, 12)
       end
 
-      -- check if unit is in same group
+      -- check if unit is in same party group
       ingroup = nil
-      for i=1,5 do -- check if unit is in group
+      for i=1,4 do
         if UnitName(string.format("party%d", i)) == UnitName(unitstr) then
           ingroup = true
+          break
         end
       end
 
