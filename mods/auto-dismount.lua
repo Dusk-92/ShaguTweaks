@@ -12,7 +12,8 @@ module.enable = function(self)
   local dismount = CreateFrame("Frame")
   ShaguTweaks.dismount = dismount
 
-  -- mount tooltip texts
+  -- Keep the legacy detection data as a compatibility fallback for custom
+  -- mounts/forms that ClassicAPI does not identify as one of the known forms.
   dismount.strings = {
     -- deDE
     "^Erhöht Tempo um (.+)%%",
@@ -34,10 +35,24 @@ module.enable = function(self)
     "根据您的骑行技能提高速度。", "根据骑术技能提高速度。", "又慢又稳......",
   }
 
-  -- shapeshift buff icons
+  -- shapeshift buff icons (legacy/custom fallback)
   dismount.shapeshifts = {
     "ability_racial_bearform", "ability_druid_catform", "ability_druid_travelform",
     "spell_nature_forceofnature", "ability_druid_aquaticform", "spell_nature_spiritwolf"
+  }
+
+  -- ClassicAPI SpellShapeshiftForm.dbc IDs matching the forms the original
+  -- module intentionally cancelled. Do not include Moonkin/Shadowform/Stealth.
+  local removableForms = {
+    [1] = true,  -- Cat
+    [2] = true,  -- Tree (vanilla DBC)
+    [3] = true,  -- Travel
+    [4] = true,  -- Aquatic
+    [5] = true,  -- Bear
+    [8] = true,  -- Dire Bear
+    [9] = true,  -- Tree of Life (Turtle WoW)
+    [11] = true, -- Swift Travel (Turtle WoW)
+    [16] = true, -- Ghost Wolf
   }
 
   -- errors that indicate mount/shapeshift
@@ -48,6 +63,30 @@ module.enable = function(self)
 
   dismount.scanner = ShaguTweaks.libtipscan:GetScanner("dismount")
 
+  local function LegacyCancel()
+    for i=0, 31 do
+      -- detect mounts based on tooltip text
+      dismount.scanner:SetPlayerBuff(i)
+      for _, str in pairs(dismount.strings) do
+        if dismount.scanner:Find(str) then
+          CancelPlayerBuff(i)
+          return true
+        end
+      end
+
+      -- detect shapeshift based on texture
+      local buff = GetPlayerBuffTexture(i)
+      if buff then
+        for _, bufftype in pairs(dismount.shapeshifts) do
+          if string.find(string.lower(buff), bufftype) then
+            CancelPlayerBuff(i)
+            return true
+          end
+        end
+      end
+    end
+  end
+
   dismount:RegisterEvent("UI_ERROR_MESSAGE")
   dismount:SetScript("OnEvent", function()
     -- stand up
@@ -56,30 +95,26 @@ module.enable = function(self)
       return
     end
 
-    -- scan through buffs and cancel shapeshift/mount
-    for id, errorstring in pairs(dismount.errors) do
+    for _, errorstring in pairs(dismount.errors) do
       if arg1 == errorstring then
-        for i=0, 31 do
-          -- detect mounts based on tooltip text
-          dismount.scanner:SetPlayerBuff(i)
-          for _, str in pairs(dismount.strings) do
-            if dismount.scanner:Find(str) then
-              CancelPlayerBuff(i)
-              return
-            end
-          end
+        -- ClassicAPI reads the real mounted/form state directly, avoiding a
+        -- 32-buff tooltip scan in the normal case.
+        if IsMounted and IsMounted() and Dismount then
+          Dismount()
+          return
+        end
 
-          -- detect shapeshift based on texture
-          local buff = GetPlayerBuffTexture(i)
-          if buff then
-            for id, bufftype in pairs(dismount.shapeshifts) do
-              if string.find(string.lower(buff), bufftype) then
-                CancelPlayerBuff(i)
-                return
-              end
-            end
+        if GetShapeshiftFormID and CancelShapeshiftForm then
+          local formID = GetShapeshiftFormID()
+          if removableForms[formID] then
+            CancelShapeshiftForm()
+            return
           end
         end
+
+        -- Preserve compatibility with custom private-server auras/forms.
+        LegacyCancel()
+        return
       end
     end
   end)
