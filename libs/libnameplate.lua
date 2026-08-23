@@ -27,10 +27,47 @@ ShaguTweaks.libnameplate.OnInit = {}
 ShaguTweaks.libnameplate.OnShow = {}
 ShaguTweaks.libnameplate.OnUpdate = {}
 
-local function InitializePlate(plate)
-  if not IsNamePlate(plate) or registry[plate] then return end
+local function GetHealthBar(plate)
+  -- Other nameplate addons may already have attached the authoritative bar.
+  if plate.healthbar and plate.healthbar.GetStatusBarColor and
+    plate.healthbar.SetStatusBarColor then
+    return plate.healthbar
+  end
 
-  plate.healthbar = plate:GetChildren()
+  -- Once another addon has added children, the health bar is no longer
+  -- guaranteed to be the first value returned by GetChildren().
+  local children = { plate:GetChildren() }
+  for i = 1, table.getn(children) do
+    local child = children[i]
+    if child and child.GetStatusBarColor and child.SetStatusBarColor then
+      return child
+    end
+  end
+
+  return children[1]
+end
+
+local function SetupPlate(plate, unit)
+  if not plate or not IsNamePlate(plate) then return end
+
+  local healthbar = GetHealthBar(plate)
+  if not healthbar then return end
+
+  local registered = registry[healthbar]
+  if registered then
+    if unit then
+      registered.unit = unit
+      registered.guid = API.UnitGUID and API.UnitGUID(unit) or nil
+    end
+    return registered
+  end
+
+  plate.healthbar = healthbar
+  if unit then
+    plate.unit = unit
+    plate.guid = API.UnitGUID and API.UnitGUID(unit) or nil
+  end
+
   for i, object in pairs({plate:GetRegions()}) do
     if NAMEPLATE_OBJECTORDER[i] then
       plate[NAMEPLATE_OBJECTORDER[i]] = object
@@ -59,27 +96,44 @@ local function InitializePlate(plate)
     end
   end)
 
-  registry[plate] = true
+  registry[healthbar] = plate
+  return plate
 end
 
 -- ClassicAPI exposes real nameplate lifecycle events and nameplateN unit
 -- tokens. Prefer those so ShaguTweaks no longer scans every WorldFrame child
--- on every rendered frame.
+-- on every rendered frame. Keep the unit token/GUID on each plate so modules
+-- can query precise unit data without identifying enemies by displayed name.
 if API.nameplates and _G.C_NamePlate and _G.C_NamePlate.GetNamePlates then
   ShaguTweaks.libnameplate:RegisterEvent("NAME_PLATE_CREATED")
   ShaguTweaks.libnameplate:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+  ShaguTweaks.libnameplate:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
   ShaguTweaks.libnameplate:RegisterEvent("PLAYER_ENTERING_WORLD")
 
   ShaguTweaks.libnameplate:SetScript("OnEvent", function()
     if event == "NAME_PLATE_CREATED" then
-      InitializePlate(arg1)
+      SetupPlate(arg1)
+
     elseif event == "NAME_PLATE_UNIT_ADDED" then
-      InitializePlate(API.GetNamePlateForUnit(arg1))
+      local unit = arg1
+      SetupPlate(API.GetNamePlateForUnit(unit), unit)
+
+    elseif event == "NAME_PLATE_UNIT_REMOVED" then
+      -- ClassicAPI resolves the leaving token during the removal handler,
+      -- before positional nameplateN indices shift.
+      local plate = API.GetNamePlateForUnit(arg1)
+      if plate then
+        plate.unit = nil
+        plate.guid = nil
+      end
+
     elseif event == "PLAYER_ENTERING_WORLD" then
       local plates = _G.C_NamePlate.GetNamePlates()
       if plates then
-        for _, plate in pairs(plates) do
-          InitializePlate(plate)
+        for i = 1, table.getn(plates) do
+          local unit = "nameplate" .. i
+          local plate = API.GetNamePlateForUnit(unit)
+          if plate then SetupPlate(plate, unit) end
         end
       end
     end
@@ -95,7 +149,7 @@ else
       childs = { WorldFrame:GetChildren() }
       for i = initialized + 1, parentcount do
         plate = childs[i]
-        InitializePlate(plate)
+        if IsNamePlate(plate) then SetupPlate(plate) end
       end
       initialized = parentcount
     end
