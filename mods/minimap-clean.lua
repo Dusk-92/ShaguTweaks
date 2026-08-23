@@ -9,7 +9,7 @@ local module = ShaguTweaks:register({
   enabled = false,
 })
 
--- 🛡️ Liste noire : tout ce qu'on ne veut PAS toucher (trackers, blips, boutons systeme...)
+-- Liste noire : tout ce qu'on ne veut PAS toucher (trackers, blips, boutons systeme...)
 local ignoreList = {
     "MiniMapTrackingFrame",
     "MiniMapMeetingStoneFrame",
@@ -48,10 +48,15 @@ local function ShouldIgnore(name)
     return false
 end
 
+-- Vanilla 1.12 can throw an error when GetScript() is queried with a script
+-- type that the frame object doesn't support (AtlasCFMButtonFrame is one
+-- example). pcall keeps detection harmless for every frame type.
 local function GetScriptSafe(frame, script)
-    if frame and frame.GetScript then
-        return frame:GetScript(script)
-    end
+    if not frame or type(frame.GetScript) ~= "function" then return nil end
+
+    local ok, handler = pcall(frame.GetScript, frame, script)
+    if ok then return handler end
+    return nil
 end
 
 local function IsAddonButton(child)
@@ -60,8 +65,6 @@ local function IsAddonButton(child)
     local name = child:GetName()
     if ShouldIgnore(name) then return false end
 
-    -- HasScript isn't part of the stock 1.12 frame API and can disappear
-    -- depending on the DLL stack. GetScript is enough and avoids that hidden dependency.
     local hasClick = GetScriptSafe(child, "OnClick")
     local hasMouseUp = GetScriptSafe(child, "OnMouseUp")
     local hasMouseDown = GetScriptSafe(child, "OnMouseDown")
