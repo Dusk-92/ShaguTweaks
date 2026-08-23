@@ -4,6 +4,7 @@
 ## Notes: A collection of tweaks and enhancements to the Default UI
 ## Notes-ruRU: Коллекция настроек и улучшений для стандартного пользовательского интерфейса.
 ## Version: GIT
+## Dependencies: !!!ClassicAPI
 ## SavedVariablesPerCharacter: ShaguTweaks_config, ShaguTweaks_cache
 
 # locales
@@ -28,6 +29,7 @@ locales\translations_zhTW.lua
 # basic
 main.lua
 helpers.lua
+api.lua
 config.lua
 
 # libraries
@@ -69,7 +71,6 @@ mods\target-castbar.lua
 mods\target-debufftimer.lua
 mods\social-colors.lua
 mods\item-colors.lua
-mods\chat-links.lua
 mods\health-numbers.lua
 mods\health-color.lua
 mods\auto-dismount.lua
@@ -85,7 +86,6 @@ mods\unitframes-bighealth.lua
 mods\unitframes-classportrait.lua
 mods\unitframes-energy-tick.lua
 mods\cooldown-numbers.lua
-mods\newmap.lua
 mods\turtle-wow.lua
 mods\superwow.lua
 mods\reduced-actionbar.lua
