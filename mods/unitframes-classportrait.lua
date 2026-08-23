@@ -41,11 +41,8 @@ local function UpdatePortraits(frame)
   local _, class = UnitClass(frame.unit)
   class = UnitIsPlayer(frame.unit) and class or nil
 
-  -- Don't reapply the exact same class texture on every UnitFrame_Update.
-  local state = class or false
-  if frame.ShaguTweaksPortraitClass == state then return end
-  frame.ShaguTweaksPortraitClass = state
-
+  -- Reapply after Blizzard's UnitFrame_Update: that function can replace the
+  -- portrait texture even when the new target has the same class.
   if class then
     local iconCoords = CLASS_ICON_TCOORDS[class]
     if iconCoords then
@@ -70,14 +67,6 @@ module.enable = function(self)
   events:RegisterEvent("PLAYER_ENTERING_WORLD")
   events:RegisterEvent("UNIT_PORTRAIT_UPDATE")
   events:SetScript("OnEvent", function()
-    -- force a state refresh because Blizzard may have replaced the texture
-    PlayerFrame.ShaguTweaksPortraitClass = nil
-    TargetFrame.ShaguTweaksPortraitClass = nil
-    PartyMemberFrame1.ShaguTweaksPortraitClass = nil
-    PartyMemberFrame2.ShaguTweaksPortraitClass = nil
-    PartyMemberFrame3.ShaguTweaksPortraitClass = nil
-    PartyMemberFrame4.ShaguTweaksPortraitClass = nil
-
     UpdatePortraits(PlayerFrame)
     UpdatePortraits(TargetFrame)
     UpdatePortraits(PartyMemberFrame1)
@@ -87,8 +76,8 @@ module.enable = function(self)
   end)
 
   -- Target-of-target has no reliable vanilla portrait event. The old module
-  -- refreshed it every rendered frame. With ClassicAPI we can cheaply watch
-  -- its GUID and only touch the portrait when the unit actually changes.
+  -- refreshed it every rendered frame. ClassicAPI gives us UnitGUID, so poll
+  -- cheaply at 5 Hz and only redraw when the actual unit changes.
   local tot = CreateFrame("Frame", nil, TargetFrame)
   tot.elapsed = 0
   tot.lastguid = nil
@@ -100,7 +89,6 @@ module.enable = function(self)
     local guid = API.UnitGUID and API.UnitGUID("targettarget") or UnitName("targettarget")
     if guid ~= this.lastguid then
       this.lastguid = guid
-      TargetofTargetFrame.ShaguTweaksPortraitClass = nil
       UpdatePortraits(TargetofTargetFrame)
     end
   end)
