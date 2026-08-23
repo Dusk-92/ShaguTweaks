@@ -1,7 +1,8 @@
 local _G = ShaguTweaks.GetGlobalEnv()
 local T = ShaguTweaks.T
-local UnitCastingInfo = ShaguTweaks.UnitCastingInfo
-local UnitChannelInfo = ShaguTweaks.UnitChannelInfo
+local API = ShaguTweaks.API
+local LegacyCastingInfo = ShaguTweaks.UnitCastingInfo
+local LegacyChannelInfo = ShaguTweaks.UnitChannelInfo
 
 local module = ShaguTweaks:register({
   title = T["Nameplate Castbar"],
@@ -10,6 +11,53 @@ local module = ShaguTweaks:register({
   category = T["Nameplates"],
   enabled = true,
 })
+
+local function QueryLegacy(query)
+  if not query then return end
+
+  local cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill = LegacyCastingInfo(query)
+  if cast then
+    return cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill, false
+  end
+
+  local channel
+  channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill = LegacyChannelInfo(query)
+  if channel then
+    return channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill, true
+  end
+end
+
+local function QueryPlateCast(plate)
+  -- nameplateN is positional, so verify its GUID before trusting a token kept
+  -- on the frame across nameplate pool recycling/reordering.
+  local unit = plate.unit
+  if unit and plate.guid and API.UnitGUID(unit) ~= plate.guid then
+    unit = nil
+  end
+
+  if unit then
+    local cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill = API.GetCastInfo(unit)
+    if cast then
+      return cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill, false
+    end
+
+    local channel
+    channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill = API.GetChannelInfo(unit)
+    if channel then
+      return channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill, true
+    end
+  end
+
+  -- SuperWoW remains the second source, keyed by stable GUID.
+  if ShaguTweaks.superwow_active and plate.guid then
+    local a, b, c, d, e, f, g, h = QueryLegacy(plate.guid)
+    if a then return a, b, c, d, e, f, g, h end
+  end
+
+  -- Final compatibility fallback: ShaguTweaks' original name/combat-log DB.
+  local name = plate.name and plate.name:GetText()
+  return QueryLegacy(name)
+end
 
 module.enable = function(self)
   if ShaguPlates then return end
@@ -72,47 +120,48 @@ module.enable = function(self)
     plate.castbar:Hide()
   end
 
-  -- scan for casts and show castbar
-  table.insert(ShaguTweaks.libnameplate.OnUpdate, function()
+  -- Keep OnUpdate only for smooth bar animation. Cast discovery itself now
+  -- prefers ClassicAPI's engine/server-backed unit cast state.
+  table.insert(ShaguTweaks.libnameplate.OnUpdate, function(plate)
+    plate = plate or this
+
     -- create castbar if not existing
-    if not this.castbar then create_castbar(this) end
+    if not plate.castbar then create_castbar(plate) end
 
-    local name = this.name:GetText()
-    local cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill = UnitCastingInfo(name)
+    local cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill, isChannel = QueryPlateCast(plate)
 
-    -- read enemy casts from SuperWoW if enabled
-    if ShaguTweaks.superwow_active then
-      cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill = UnitCastingInfo(this:GetName(1))
-    end
-
-    if cast then
+    if cast and startTime and endTime and endTime > startTime then
       local duration = endTime - startTime
       local max = duration / 1000
       local cur = GetTime() - startTime / 1000
 
+      if isChannel then
+        cur = max + startTime/1000 - GetTime()
+      end
+
       cur = cur > max and max or cur
       cur = cur < 0 and 0 or cur
 
-      this.castbar:Show()
-      this.castbar:SetMinMaxValues(0, duration / 1000)
-      this.castbar:SetValue(cur)
+      plate.castbar:Show()
+      plate.castbar:SetMinMaxValues(0, max)
+      plate.castbar:SetValue(cur)
 
       local percent = cur / max
-      local x = this.castbar:GetWidth()*percent
-      this.castbar.spark:SetPoint("CENTER", this.castbar, "LEFT", x, 0)
+      local x = plate.castbar:GetWidth()*percent
+      plate.castbar.spark:SetPoint("CENTER", plate.castbar, "LEFT", x, 0)
 
-      this.castbar.text:SetText(cast)
+      plate.castbar.text:SetText(cast)
 
       if texture then
-        this.castbar.texture.icon:SetTexture(texture)
-        this.castbar.texture.icon:Show()
+        plate.castbar.texture.icon:SetTexture(texture)
+        plate.castbar.texture.icon:Show()
       else
-        this.castbar.texture.icon:Hide()
+        plate.castbar.texture.icon:Hide()
       end
 
-      this.castbar:SetAlpha(this:GetAlpha())
+      plate.castbar:SetAlpha(plate:GetAlpha())
     else
-      this.castbar:Hide()
+      plate.castbar:Hide()
     end
   end)
 end
