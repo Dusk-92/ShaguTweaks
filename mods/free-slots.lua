@@ -35,73 +35,36 @@ module.enable = function(self)
   button.count:SetJustifyH("RIGHT")
   button.count:SetFontObject(GameFontWhite)
 
-  -- class-specific bags
-  local soul    = { "Core Felcloth Bag", "D'Sak's Small bag", "Felcloth Bag", "Box of Souls", "Small Soul Pouch", "Soul Pouch" }
-  local quiver  = { "Ancient Sinew Wrapped Lamina", "Harpy Hide Quiver", "Heavy Quiver", "Quickdraw Quiver", "Quiver of the Night Watch", "Ribbly's Quiver", "Hunting Quiver", "Light Leather Quiver", "Light Quiver", "Medium Quiver", "Small Quiver" }
-  local pouch   = { "Gnoll Skin Bandolier", "Bandolier of the Night Watch", "Heavy Leather Ammo Pouch", "Ribbly's Bandolier", "Thick Leather Ammo Pouch", "Hunting Ammo Sack", "Medium Shot Pouch", "Small Ammo Pouch", "Small Leather Ammo Pouch", "Small Shot Pouch" }
-  -- reagent bags
-  local herb    = { "Cenarion Herb Bag", "Herb Pouch", "Satchel of Cenarius" }
-  local ench    = { "Big Bag of Enchantment", "Enchanted Mageweave Pouch", "Enchanted Runecloth Bag" }
+  local function UpdateSlots()
+    local freeClass, freeReagent, freeGeneral = 0, 0, 0
+    local hasClass, hasReagent = false, false
 
-  local freeClass   = 0
-  local freeReagent = 0
+    for bag = 0, 4 do
+      local free, family = C_Container.GetContainerNumFreeSlots(bag)
+      free = free or 0
+      family = family or 0
 
-  local function findName(name, names)
-    for _, bagName in ipairs(names) do
-      if string.find(name, bagName) then return true end
-    end
-    return false
-  end
-
-  local function classSlots()
-    local found, free = false, 0
-    for i = 0, 4 do
-      local name = GetBagName(i)
-      if name and (findName(name, soul) or findName(name, quiver) or findName(name, pouch)) then
-        found = true
-        for slot = 1, GetContainerNumSlots(i) do
-          if not GetContainerItemLink(i, slot) then free = free + 1 end
-        end
+      -- Preserve the original categories exactly:
+      -- arrows/ammo/soul bags are class bags; herb/enchanting bags are reagents.
+      if family == 1 or family == 2 or family == 4 then
+        hasClass = true
+        freeClass = freeClass + free
+      elseif family == 32 or family == 64 then
+        hasReagent = true
+        freeReagent = freeReagent + free
+      else
+        freeGeneral = freeGeneral + free
       end
     end
-    freeClass = free
-    button.class:SetText(found and free or "")
+
+    button.class:SetText(hasClass and freeClass or "")
+    button.reagent:SetText(hasReagent and freeReagent or "")
+    button.count:SetText(freeGeneral)
   end
 
-  local function reagentSlots()
-    local found, free = false, 0
-    for i = 0, 4 do
-      local name = GetBagName(i)
-      if name and (findName(name, herb) or findName(name, ench)) then
-        found = true
-        for slot = 1, GetContainerNumSlots(i) do
-          if not GetContainerItemLink(i, slot) then free = free + 1 end
-        end
-      end
-    end
-    freeReagent = free
-    button.reagent:SetText(found and free or "")
-  end
-
-  local function freeSlots()
-    local free = 0
-    for i = 0, 4 do
-      for slot = 1, GetContainerNumSlots(i) do
-        if not GetContainerItemLink(i, slot) then free = free + 1 end
-      end
-    end
-    button.count:SetText(free - freeClass - freeReagent)
-  end
-
-  classSlots()
-  reagentSlots()
-  freeSlots()
+  UpdateSlots()
 
   local events = CreateFrame("Frame")
-  events:RegisterEvent("BAG_UPDATE")
-  events:SetScript("OnEvent", function()
-    classSlots()
-    reagentSlots()
-    freeSlots()
-  end)
+  events:RegisterEvent("BAG_UPDATE_DELAYED")
+  events:SetScript("OnEvent", UpdateSlots)
 end
