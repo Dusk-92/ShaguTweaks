@@ -48,19 +48,28 @@ local function ShouldIgnore(name)
     return false
 end
 
-local function IsAddonButton(child)
-    local name = child:GetName()
+local function GetScriptSafe(frame, script)
+    if frame and frame.GetScript then
+        return frame:GetScript(script)
+    end
+end
 
+local function IsAddonButton(child)
+    if not child or not child.GetName then return false end
+
+    local name = child:GetName()
     if ShouldIgnore(name) then return false end
 
-    local hasClick = child:HasScript("OnClick") and child:GetScript("OnClick")
-    local hasMouseUp = child:HasScript("OnMouseUp") and child:GetScript("OnMouseUp")
-    local hasMouseDown = child:HasScript("OnMouseDown") and child:GetScript("OnMouseDown")
+    -- HasScript isn't part of the stock 1.12 frame API and can disappear
+    -- depending on the DLL stack. GetScript is enough and avoids that hidden dependency.
+    local hasClick = GetScriptSafe(child, "OnClick")
+    local hasMouseUp = GetScriptSafe(child, "OnMouseUp")
+    local hasMouseDown = GetScriptSafe(child, "OnMouseDown")
 
     -- Parfois, le bouton cliquable est cache dans un enfant de la frame principale
-    if not (hasClick or hasMouseUp or hasMouseDown) then
+    if not (hasClick or hasMouseUp or hasMouseDown) and child.GetChildren then
         for _, subchild in ipairs({child:GetChildren()}) do
-            if subchild:HasScript("OnClick") and subchild:GetScript("OnClick") then
+            if GetScriptSafe(subchild, "OnClick") then
                 return true
             end
         end
@@ -91,8 +100,7 @@ module.enable = function(self)
     self.frame = self.frame or CreateFrame("Frame")
 
     self.frame:SetScript("OnUpdate", function()
-        -- ⚠️ En vanilla 1.12, OnUpdate ne passe pas "elapsed" en parametre de fonction,
-        -- il faut utiliser la variable globale arg1 !
+        -- En vanilla 1.12, OnUpdate utilise la variable globale arg1.
         self.elapsed = self.elapsed + arg1
         if self.elapsed < THROTTLE then return end
         self.elapsed = 0
