@@ -10,7 +10,22 @@ local module = ShaguTweaks:register({
   enabled = true,
 })
 
+local function ChatTweaksOwnsClassColors()
+  local configured = ShaguTweaks_config and ShaguTweaks_config[T["Chat Tweaks"]]
+  if configured ~= nil then return configured == 1 end
+
+  -- On a fresh install config defaults are initialized while modules are
+  -- enabled, so fall back to the registered module default when needed.
+  local chat = ShaguTweaks.mods and ShaguTweaks.mods[T["Chat Tweaks"]]
+  return chat and chat.enabled or false
+end
+
 module.enable = function(self)
+  -- The current enhanced Chat Tweaks module already carries this exact color
+  -- table. Avoid applying it twice while keeping Blue Shaman independent when
+  -- Chat Tweaks is disabled.
+  if ChatTweaksOwnsClassColors() then return end
+
   -- update table to get unknown colors and blue shamans for vanilla
   RAID_CLASS_COLORS = {
     ["WARRIOR"] = { r = 0.78, g = 0.61, b = 0.43, colorStr = "ffc79c6e" },
