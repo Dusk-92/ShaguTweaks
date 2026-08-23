@@ -9,10 +9,10 @@ local module = ShaguTweaks:register({
 })
 
 module.enable = function(self)
-   local _G = ShaguTweaks.GetGlobalEnv()
-
-    local UnitCastingInfo = ShaguTweaks.UnitCastingInfo
-    local UnitChannelInfo = ShaguTweaks.UnitChannelInfo
+    local _G = ShaguTweaks.GetGlobalEnv()
+    local API = ShaguTweaks.API
+    local LegacyCastingInfo = ShaguTweaks.UnitCastingInfo
+    local LegacyChannelInfo = ShaguTweaks.UnitChannelInfo
 
     local castbar = CreateFrame("FRAME", "STImprovedCastbar", CastingBarFrame)
     castbar:Hide()
@@ -27,15 +27,14 @@ module.enable = function(self)
     castbar.texture.icon:SetWidth(24)
     castbar.texture.icon:SetHeight(24)
     castbar.texture:SetBackdrop({
-        -- edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
         edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
         tile = true, tileSize = 8, edgeSize = 12,
         insets = { left = 2, right = 2, top = 2, bottom = 2 }
     })
-    
+
     if ShaguTweaks.DarkMode then
-        castbar.texture:SetBackdropBorderColor( .3, .3, .3, .9)
-    end   
+        castbar.texture:SetBackdropBorderColor(.3, .3, .3, .9)
+    end
 
     castbar.spellText = castbar:CreateFontString(nil, "HIGH", "GameFontWhite")
     castbar.spellText:SetPoint("CENTER", CastingBarFrame, "CENTER", 0, 3)
@@ -48,32 +47,48 @@ module.enable = function(self)
 
     CastingBarText:Hide()
 
-    local name = GetUnitName("player")
+    local function QueryPlayerCast()
+        local cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill = API.GetCastInfo("player")
+        if cast then
+            return cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill, false
+        end
+
+        local channel
+        channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill = API.GetChannelInfo("player")
+        if channel then
+            return channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill, true
+        end
+
+        cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill = LegacyCastingInfo("player")
+        if cast then
+            return cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill, false
+        end
+
+        channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill = LegacyChannelInfo("player")
+        if channel then
+            return channel, nameSubtext, text, texture, startTime, endTime, isTradeSkill, true
+        end
+    end
 
     castbar:SetScript("OnUpdate", function()
-        local cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill = UnitCastingInfo("player")
-        if not cast then
-        -- scan for channel spells if no cast was found
-        cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill = UnitChannelInfo("player")
-        end
+        local cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill, isChannel = QueryPlayerCast()
 
         local alpha = CastingBarFrame:GetAlpha()
         castbar:SetAlpha(alpha)
 
-        if cast then
-            local channel = UnitChannelInfo(name)
+        if cast and startTime and endTime and endTime > startTime then
             local duration = endTime - startTime
             local max = duration / 1000
             local cur = GetTime() - startTime / 1000
 
-            if channel then
+            if isChannel then
                 cur = max + startTime/1000 - GetTime()
             end
 
             cur = cur > max and max or cur
             cur = cur < 0 and 0 or cur
 
-            local rem = max - cur
+            local rem = isChannel and cur or (max - cur)
             rem = string.format("%.1f"..T["s"], rem)
 
             castbar.spellText:SetText(cast)
@@ -86,7 +101,7 @@ module.enable = function(self)
                 castbar.texture.icon:Hide()
             end
         else
-            if ( alpha == 0 ) then
+            if alpha == 0 then
                 castbar:Hide()
             end
         end
