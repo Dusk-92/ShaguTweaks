@@ -75,7 +75,27 @@ The goal stays the same: stay non-intrusive to the default UI, while giving you 
 
 ---
 
+## 📜 Project identity & licensing
+
+This is an independent community-maintained fork of **ShaguTweaks**. Compatibility
+with **World of Warcraft**, **Turtle WoW / OctoWoW-like environments**,
+**SuperWoW**, **pfUI**, **zUI**, or other referenced projects does not imply
+affiliation, endorsement, sponsorship, or ownership.
+
+**World of Warcraft** and **Blizzard Entertainment** names, marks, and game
+assets remain the property of their respective rights holders.
+
+For detailed provenance and licensing information, see:
+
+- [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+- [PROJECT_IDENTITY.md](PROJECT_IDENTITY.md)
+- [Docs/CODE_PROVENANCE.md](Docs/CODE_PROVENANCE.md)
+- [Docs/ASSET_PROVENANCE.md](Docs/ASSET_PROVENANCE.md)
+- [LICENSES/](LICENSES/)
+
+---
+
 ## 🙏 Credits
 
-Original addon by **shagu**. Code also borrows from **pfUI** and **zUI**.
+Original addon by **shagu**. Additional ideas and development references include **pfUI** and **zUI**.
 This fork adapts, patches and extends ShaguTweaks for **OctoWoW / Turtle WoW**.
